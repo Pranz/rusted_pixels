@@ -1,0 +1,6 @@
+[package]
+name = "rusted_pixels"
+version = "0.1.0"
+authors = ["Jesper Fridefors <jesper.fridefors@gmail.com>"]
+
+[dependencies]
