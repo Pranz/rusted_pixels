@@ -49,6 +49,8 @@ pub fn main() {
                                              Color::RGB(100, 100, 100));
     let preview_window = DrawingWindow::new(400, 50, 1,
                                             Color::RGB(0,0,0));
+    let preview_window2 = DrawingWindow::new(400, 400, 2,
+                                             Color::RGB(0,0,0));
 
     'main_loop: loop {
         for event in event_pump.poll_iter() {
@@ -88,6 +90,7 @@ pub fn main() {
 
         draw_window.draw(&mut renderer, &image);
         preview_window.draw(&mut renderer, &image);
+        preview_window2.draw(&mut renderer, &image);
         
         renderer.present();
     }
