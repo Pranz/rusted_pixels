@@ -3,7 +3,8 @@ name = "rusted_pixels"
 version = "0.1.0"
 authors = ["Jesper Fridefors <jesper.fridefors@gmail.com>"]
 
-[dependencies]
+[dependencies.png]
+git = "https://github.com/PistonDevelopers/image-png"
 
 [dependencies.sdl2]
 git = "https://github.com/AngryLawyer/rust-sdl2"

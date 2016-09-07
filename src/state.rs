@@ -15,14 +15,14 @@ pub struct State {
 }
 
 impl State {
-    pub fn new() -> State {
+    pub fn new() -> Self {
         State {
             current_color: Color::RGB(255,255,255),
             left_mouse_down: false,
             right_mouse_down: false,
             mouse_x: 0,
             mouse_y: 0,
-            images: vec![ImageBuffer::new(32,64)],
+            images: vec![],
         }
     }
 }
