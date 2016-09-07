@@ -51,11 +51,14 @@ impl ImageBuffer {
 
                     //Map every three elements of the data to a Color struct
                     img_data.chunks(3).map(|color_data|{
-                        if let &[r,g,b] = color_data{
-                            Color::RGB(r,g,b)
-                        }else{
-                            unreachable!()
-                        }
+                        //Not unsafe because of the data length check above
+                        //It checks if the bytes of img_data are divisible by the chunk size
+                        //Therefore, every color data has exactly chunk size amount of elements
+                        unsafe{Color::RGB(
+                            *color_data.get_unchecked(0),
+                            *color_data.get_unchecked(1),
+                            *color_data.get_unchecked(2),
+                        )}
                     }).collect()
                 },
                 RGBA => {
@@ -69,11 +72,15 @@ impl ImageBuffer {
 
                     //Map every four elements of the data to a Color struct
                     img_data.chunks(4).map(|color_data|{
-                        if let &[r,g,b,a] = color_data{
-                            Color::RGBA(r,g,b,a)
-                        }else{
-                            unreachable!();
-                        }
+                        //Not unsafe because of the data length check above
+                        //It checks if the bytes of img_data are divisible by the chunk size
+                        //Therefore, every color data has exactly chunk size amount of elements
+                        unsafe{Color::RGBA(
+                            *color_data.get_unchecked(0),
+                            *color_data.get_unchecked(1),
+                            *color_data.get_unchecked(2),
+                            *color_data.get_unchecked(3),
+                        )}
                     }).collect()
                 },
                 _ => {

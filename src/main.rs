@@ -1,5 +1,3 @@
-#![feature(associated_consts,slice_patterns)]
-
 extern crate sdl2;
 extern crate png;
 

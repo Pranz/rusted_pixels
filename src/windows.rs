@@ -141,24 +141,24 @@ pub struct PaletteWindow{
     pub y: usize,
     pub palette_id: usize,
 }
-impl PaletteWindow{
-    const COLOR_SQUARE_PX: usize = 24;
-    const COLORS_PER_ROW: usize = 3;
-    const PADDING_PX: usize = 3;
-}
+
+const PALETTEWINDOW_COLOR_SQUARE_PX: usize = 24;
+const PALETTEWINDOW_COLORS_PER_ROW: usize = 3;
+const PALETTEWINDOW_PADDING_PX: usize = 3;
+
 impl Window for PaletteWindow{
     fn handle_mouse_down(&self, state: &mut State,
                              mouse_x: i32, mouse_y: i32) {
-        let palette_x1 = self.x+Self::PADDING_PX;
-        let palette_x2 = self.x+Self::PADDING_PX + Self::COLORS_PER_ROW*Self::COLOR_SQUARE_PX;
-        let palette_y1 = self.y+Self::PADDING_PX;
-        let palette_y2 = self.y+Self::PADDING_PX + (state.palettes.len() as f32/Self::COLORS_PER_ROW as f32).ceil() as usize*Self::COLOR_SQUARE_PX;
+        let palette_x1 = self.x+PALETTEWINDOW_PADDING_PX;
+        let palette_x2 = self.x+PALETTEWINDOW_PADDING_PX + PALETTEWINDOW_COLORS_PER_ROW*PALETTEWINDOW_COLOR_SQUARE_PX;
+        let palette_y1 = self.y+PALETTEWINDOW_PADDING_PX;
+        let palette_y2 = self.y+PALETTEWINDOW_PADDING_PX + (state.palettes.len() as f32/PALETTEWINDOW_COLORS_PER_ROW as f32).ceil() as usize*PALETTEWINDOW_COLOR_SQUARE_PX;
 
         if mouse_x as usize>=palette_x1 && mouse_x as usize<=palette_x2
         && mouse_y as usize>=palette_y1 && mouse_y as usize<=palette_y2{
-            let palette_x = (mouse_x as usize-palette_x1)/Self::COLOR_SQUARE_PX;
-            let palette_y = (mouse_y as usize-palette_y1)/Self::COLOR_SQUARE_PX;
-            let palette_id = palette_x%Self::COLORS_PER_ROW + palette_y*Self::COLORS_PER_ROW;
+            let palette_x = (mouse_x as usize-palette_x1)/PALETTEWINDOW_COLOR_SQUARE_PX;
+            let palette_y = (mouse_y as usize-palette_y1)/PALETTEWINDOW_COLOR_SQUARE_PX;
+            let palette_id = palette_x%PALETTEWINDOW_COLORS_PER_ROW + palette_y*PALETTEWINDOW_COLORS_PER_ROW;
 
             if let Some(color) = state.palettes.get(palette_id){
                 state.current_color = *color;
@@ -171,16 +171,16 @@ impl Window for PaletteWindow{
         renderer.fill_rect(Rect::new(
             self.x as i32,
             self.y as i32,
-            (Self::COLORS_PER_ROW * Self::COLOR_SQUARE_PX + 2*Self::PADDING_PX) as u32,
-            ((state.palettes.len() as f32 / Self::COLORS_PER_ROW as f32).ceil() as usize * Self::COLOR_SQUARE_PX + 2*Self::PADDING_PX) as u32,
+            (PALETTEWINDOW_COLORS_PER_ROW * PALETTEWINDOW_COLOR_SQUARE_PX + 2*PALETTEWINDOW_PADDING_PX) as u32,
+            ((state.palettes.len() as f32 / PALETTEWINDOW_COLORS_PER_ROW as f32).ceil() as usize * PALETTEWINDOW_COLOR_SQUARE_PX + 2*PALETTEWINDOW_PADDING_PX) as u32,
         )).ok();
 
         for (i,color) in state.palettes.iter().enumerate(){
             renderer.set_draw_color(*color);
-            renderer.fill_rect(Rect::new((Self::PADDING_PX as usize + self.x + (i%Self::COLORS_PER_ROW as usize)*Self::COLOR_SQUARE_PX as usize) as i32,
-                                         (Self::PADDING_PX as usize + self.y + (i/Self::COLORS_PER_ROW as usize)*Self::COLOR_SQUARE_PX as usize) as i32,
-                                         Self::COLOR_SQUARE_PX as u32,
-                                         Self::COLOR_SQUARE_PX as u32)).ok();
+            renderer.fill_rect(Rect::new((PALETTEWINDOW_PADDING_PX as usize + self.x + (i%PALETTEWINDOW_COLORS_PER_ROW as usize)*PALETTEWINDOW_COLOR_SQUARE_PX as usize) as i32,
+                                         (PALETTEWINDOW_PADDING_PX as usize + self.y + (i/PALETTEWINDOW_COLORS_PER_ROW as usize)*PALETTEWINDOW_COLOR_SQUARE_PX as usize) as i32,
+                                         PALETTEWINDOW_COLOR_SQUARE_PX as u32,
+                                         PALETTEWINDOW_COLOR_SQUARE_PX as u32)).ok();
         }
     }
 }
