@@ -1,4 +1,4 @@
-#![feature(slice_patterns)]
+#![feature(associated_consts,slice_patterns)]
 
 extern crate sdl2;
 extern crate png;
@@ -16,7 +16,7 @@ pub mod state;
 
 use image_buffer::ImageBuffer;
 use state::State;
-use windows::{DrawingWindow, Window, PreviewWindow};
+use windows::*;
 
 pub fn main() {
     let sdl_context = sdl2::init().unwrap();
@@ -46,7 +46,9 @@ pub fn main() {
                  DrawingWindow::new(400, 50, 1,
                                     Color::RGB(50,50,50), 0))),
              Box::new(DrawingWindow::new(400, 400, 2,
-                                         Color::RGB(50,50,50), 0))];
+                                         Color::RGB(50,50,50), 0)),
+             Box::new(PaletteWindow{x: 400,y: 100,palette_id: 0}),
+            ];
 
     'main_loop: loop {
         for event in event_pump.poll_iter() {
