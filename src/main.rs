@@ -5,25 +5,13 @@ use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::render::BlendMode;
 use sdl2::mouse::Mouse;
-use sdl2::rect::*;
 
 pub mod image_buffer;
 pub mod windows;
+pub mod state;
 
-use windows::DrawingWindow;
-use image_buffer::ImageBuffer;
-
-pub fn handle_mouse_down(window: &DrawingWindow,
-                         image: &mut ImageBuffer,
-                         color: Color,
-                         mouse_x: i32,
-                         mouse_y : i32) {
-    
-    let coordinates = window.get_index(&image, mouse_x, mouse_y);
-    if let Some((x,y)) = coordinates {
-        *image.get_mut_ref(x as usize,y as usize) = color; 
-    }
-}
+use state::State;
+use windows::{DrawingWindow, Window, PreviewWindow};
 
 pub fn main() {
     let sdl_context = sdl2::init().unwrap();
@@ -35,22 +23,22 @@ pub fn main() {
         .unwrap();
 
     let mut renderer = window.renderer().present_vsync().build().unwrap();
+    
+    // this is the most intuitive blend mode.
     renderer.set_blend_mode(BlendMode::Blend);
+    
     let mut event_pump = sdl_context.event_pump().unwrap();
-    let mut image = ImageBuffer::new(32,64);
-    let mut current_color = Color::RGB(255,255,255);
-    let mut left_mouse_down = false;
 
-    *image.get_mut_ref(0, 0) = Color::RGB(255, 0, 0);
-    *image.get_mut_ref(1, 0) = Color::RGB(255, 255, 255);
-    *image.get_mut_ref(5, 5) = Color::RGB(255, 255, 255);
+    let mut state = State::new();
 
-    let mut draw_window = DrawingWindow::new(50, 50, 8,
-                                             Color::RGB(100, 100, 100));
-    let preview_window = DrawingWindow::new(400, 50, 1,
-                                            Color::RGB(0,0,0));
-    let preview_window2 = DrawingWindow::new(400, 400, 2,
-                                             Color::RGB(0,0,0));
+    let mut windows: Vec<Box<Window>> =
+        vec![Box::new(DrawingWindow::new(50, 50, 8,
+                                         Color::RGB(100, 100, 100), 0)),
+             Box::new(PreviewWindow(
+                 DrawingWindow::new(400, 50, 1,
+                                    Color::RGB(50,50,50), 0))),
+             Box::new(DrawingWindow::new(400, 400, 2,
+                                         Color::RGB(50,50,50), 0))];
 
     'main_loop: loop {
         for event in event_pump.poll_iter() {
@@ -60,37 +48,37 @@ pub fn main() {
                     break 'main_loop
                 },
                 Event::MouseButtonDown { mouse_btn: Mouse::Left,
-                                         x: x, y: y, .. } => {
-                    left_mouse_down = true;
-                    handle_mouse_down(&draw_window, &mut image,
-                                      current_color, x, y);
+                                         x, y, .. } => {
+                    state.left_mouse_down = true;
+                    for window in &windows {
+                        window
+                            .handle_mouse_down(&mut state, x, y);
+                    }
                 },
-                Event::MouseMotion { x: x, y: y, .. } => {
-                    if left_mouse_down {
-                        handle_mouse_down(&draw_window, &mut image,
-                                          current_color, x, y);
+                Event::MouseMotion { x, y, .. } => {
+                    state.mouse_x = x;
+                    state.mouse_y = y;
+                    if state.left_mouse_down {
+                        for window in &windows {
+                            window
+                                .handle_mouse_down(&mut state, x, y);
+                        }
                     }
                 }
                 Event::MouseButtonUp { mouse_btn: Mouse::Left, .. } => {
-                    left_mouse_down = false;
+                    state.left_mouse_down = false;
                 }
                 _ => {}
             }
-        }
-
-        {
-            let mut window = renderer.window_mut().unwrap();
-            
-            
         }
 
         renderer.set_draw_color(Color::RGB(0, 0, 0));
         renderer.clear();
         renderer.set_draw_color(Color::RGB(255,255,255));
 
-        draw_window.draw(&mut renderer, &image);
-        preview_window.draw(&mut renderer, &image);
-        preview_window2.draw(&mut renderer, &image);
+        for window in &windows {
+            window.draw(&mut renderer, &state);
+        }
         
         renderer.present();
     }

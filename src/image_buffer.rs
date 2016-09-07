@@ -1,6 +1,9 @@
 
 use sdl2::pixels::Color;
 
+/*
+ * Holds image data
+ */
 pub struct ImageBuffer {
     pub width: usize,
     pub height: usize,
