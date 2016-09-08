@@ -19,3 +19,6 @@ encoder yet, so I might have to write my own.~~
 
 Piston had a work in progress encoder that @Lolirofle forked and did something
 with. Yay!
+
+## Contributors
+ * [Lolirofle](https://github.com/Lolirofle)
