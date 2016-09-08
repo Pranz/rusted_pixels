@@ -14,8 +14,8 @@ my own. This will be a pretty simple editor, most important features will be:
  * Keyboard driven (Basically, the only thing which should require the mouse
 should be to draw)
 
-~Unfortunately, the current libpng binding for rust haven't implemented an
-encoder yet, so I might have to write my own.~
+~~Unfortunately, the current libpng binding for rust haven't implemented an
+encoder yet, so I might have to write my own.~~
 
 Piston had a work in progress encoder that @Lolirofle forked and did something
 with. Yay!
