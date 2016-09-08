@@ -1,6 +1,10 @@
 Pixel art editor
 ================
 
+    23:24:07 lolirofle | Vrf Pixel art editor ens. Behöver?
+    23:24:13     pranz | Ja
+    23:24:24 lolirofle | Jag med
+
 Unsatisfied wih most free linux compatible pixel art editors, I started one
 my own. This will be a pretty simple editor, most important features will be:
  * Loading palettes from files and exporting palettes
