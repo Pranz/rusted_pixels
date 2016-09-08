@@ -11,6 +11,9 @@ use std::path;
 pub mod image_buffer;
 pub mod windows;
 pub mod state;
+pub mod input;
+
+use input::*;
 
 use image_buffer::ImageBuffer;
 use state::State;
@@ -51,8 +54,7 @@ pub fn main() {
     'main_loop: loop {
         for event in event_pump.poll_iter() {
             match event {
-                Event::Quit {..}
-                | Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
+                Event::Quit {..} => {
                     break 'main_loop
                 },
                 Event::MouseButtonDown { mouse_btn: Mouse::Left,
@@ -76,8 +78,38 @@ pub fn main() {
                 Event::MouseButtonUp { mouse_btn: Mouse::Left, .. } => {
                     state.left_mouse_down = false;
                 },
-                Event::KeyDown { keycode: Some(Keycode::S), keymod: sdl2::keyboard::LCTRLMOD, .. } => {
+                /*Event::KeyDown { keycode: Some(Keycode::S), keymod: sdl2::keyboard::LCTRLMOD, .. } => {
                     state.images[0].save_png_image("test_out.png").unwrap();
+                },*/
+                Event::KeyDown { keycode: Some(keycode), keymod, .. } => {
+                    use sdl2::keyboard::{LCTRLMOD, LALTMOD};
+
+                    // every command begins with a single key
+                    if state.input.is_empty() {
+                        match keymod {
+                            LCTRLMOD => {
+                                state.input.push(
+                                    Input::Char(ExtendedChar::CtrlModified(keycode)));
+                            },
+                            LALTMOD => {
+                                state.input.push(
+                                    Input::Char(ExtendedChar::AltModified(keycode)));
+                            },
+                            _ => {
+                                state.input.push(
+                                    Input::Char(ExtendedChar::NonModified(keycode)));
+                            }
+                        }
+                        match execute_command(&mut state) {
+                            CommandResult::Quit => { break 'main_loop },
+                            _ => {}
+                        }
+                    } else {
+                        // add the keycode char to some buffer,
+                        // then add code to interpret that buffer when
+                        // RET is pressed
+                    }
+                    
                 },
                 _ => {}
             }

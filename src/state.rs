@@ -1,6 +1,7 @@
 
 use sdl2::pixels::Color;
 use image_buffer::ImageBuffer;
+use input::{Input, Arg};
 
 /*
  * Holds the main state, pretty self explanatory.
@@ -13,6 +14,8 @@ pub struct State {
     pub mouse_y: i32,
     pub images: Vec<ImageBuffer>,
     pub palettes: Vec<Color>,//TODO: Multiple palettes
+    pub input: Vec<Input>,
+    pub args: Vec<Arg>,
 }
 
 impl State {
@@ -30,6 +33,8 @@ impl State {
                 Color::RGB(255,255,255),
                 Color::RGB(192,128,112),
             ],
+            input: Vec::new(),
+            args: Vec::new(),
         }
     }
 }
