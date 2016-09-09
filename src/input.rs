@@ -32,26 +32,39 @@ pub enum Arg {
 }
 
 impl Arg {
-
+    pub fn coerce_string(self) -> String {
+        if let Arg::String(string) = self {
+            return string;
+        }
+        panic!("Commands misconfigured. Expected `String` on stack.");
+    }
 }
 
 #[derive(Copy, Clone)]
 pub enum Command {
     ExportPng,
+    Print,
     Quit,
 }
+
+pub const META_X: Input
+    = Input::Char(ExtendedChar::AltModified(Keycode::X)); 
 
 pub fn get_commands() -> Vec<(Vec<Input>, Command)> {
     vec![(vec![Input::Char(ExtendedChar::CtrlModified(Keycode::S))],
           Command::ExportPng),
-         (vec![Input::Char(ExtendedChar::AltModified(Keycode::X)),
+         (vec![META_X,
                Input::Exact(String::from("export-png"))],
           Command::ExportPng),
          (vec![Input::Char(ExtendedChar::CtrlModified(Keycode::Q))],
           Command::Quit),
-         (vec![Input::Char(ExtendedChar::AltModified(Keycode::X)),
+         (vec![META_X,
                Input::Exact(String::from("quit"))],
-          Command::Quit)
+          Command::Quit),
+         (vec![META_X,
+               Input::Exact(String::from("print")),
+               Input::String],
+          Command::Print)
     ]
 }
 
@@ -61,7 +74,11 @@ pub enum InterpretErr {
     RequiresMoreInput
 }
 
-
+/*
+ * Interpret the given input to see if there's a matching command
+ * Returns matching command or an err if more input is required,
+ * or wether there's no possible command for the input so far.
+ */
 pub fn interpret_input(input: &[Input],
                        commands: &[(Vec<Input>, Command)])
                                    -> Result<Command, InterpretErr> {
@@ -88,6 +105,13 @@ pub enum CommandResult {
     Success,
 }
 
+/*
+ * Check wether the current states input has a valid
+ * command, and if so, executes the given command.
+ * If no command is possible from the given input,
+ * clear the input buffer. Otherwise, do nothing
+ * and await more user input
+ */
 pub fn execute_command(state: &mut State,
                        commands: &[(Vec<Input>, Command)])
 -> CommandResult {
@@ -107,6 +131,11 @@ pub fn execute_command(state: &mut State,
             Command::Quit => {
                 println!("quit succesfully");
                 CommandResult::Quit
+            },
+            Command::Print => {
+                println!("{}", state.args.pop().unwrap().coerce_string());
+                clean_input_and_args(state);
+                CommandResult::Success
             },
         },
         Err(InterpretErr::NoValidCommand) => {
@@ -149,6 +178,27 @@ pub fn keycode_to_char(keycode: Keycode) -> Option<char> {
         Keycode::Z => Some('z'),
         Keycode::Quote => Some('\''),
         Keycode::Minus => Some('-'),
+        Keycode::Space => Some(' '),
         _ => None,
     }
 }
+
+/*
+ * Parses the input, returning.
+ * If the input is an argument, also return it.
+ */
+pub fn parse_input(input: &str) -> (Input, Option<Arg>) {
+    if let Ok(integer) = input.parse::<isize>() {
+        (Input::Integer, Some(Arg::Integer(integer)))
+    }
+    else if input.len() > 1 &&
+        input.starts_with('\'') &&
+        input.as_bytes()[input.len() - 1] == b'\'' {
+            (Input::String, Some(Arg::String(
+                input[1..(input.len() - 1)].to_string())))
+        }
+    else {
+        (Input::Exact(input.to_string()), None)
+    }
+}
+

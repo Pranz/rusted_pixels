@@ -116,8 +116,12 @@ pub fn main() {
                         }
                     }
                     else if keycode == Keycode::Return {
-                        state.input.push(Input::Exact(
-                            state.input_buffer.clone()));
+                        let (input_type, arg)
+                            = input::parse_input(&state.input_buffer);
+                        state.input.push(input_type);
+                        if let Some(arg) = arg {
+                            state.args.push(arg);
+                        }
                         state.input_buffer = String::new();
                         match execute_command(&mut state, &commands) {
                             CommandResult::Quit => { break 'main_loop },
