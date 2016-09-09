@@ -22,6 +22,7 @@ use windows::*;
 pub fn main() {
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
+    let commands = input::get_commands();
 
     let window = video_subsystem.window("rusted pixels", 800, 600)
         .resizable()
@@ -100,14 +101,34 @@ pub fn main() {
                                     Input::Char(ExtendedChar::NonModified(keycode)));
                             }
                         }
-                        match execute_command(&mut state) {
+                        match execute_command(&mut state, &commands) {
                             CommandResult::Quit => { break 'main_loop },
                             _ => {}
                         }
-                    } else {
-                        // add the keycode char to some buffer,
-                        // then add code to interpret that buffer when
-                        // RET is pressed
+                    }
+                    // If escape is pressed, clear input buffer or pop
+                    // input stack
+                    else if keycode == Keycode::Escape {
+                        if !state.input_buffer.is_empty() {
+                            state.input_buffer = String::new();
+                        } else {
+                            state.input.pop();
+                        }
+                    }
+                    else if keycode == Keycode::Return {
+                        state.input.push(Input::Exact(
+                            state.input_buffer.clone()));
+                        state.input_buffer = String::new();
+                        match execute_command(&mut state, &commands) {
+                            CommandResult::Quit => { break 'main_loop },
+                            _ => {}
+                        }
+                    }
+                    else {
+                        if let Some(chr) = input::keycode_to_char(keycode) {
+                            state.input_buffer.push(chr);
+                            println!("{:?}", state.input_buffer.as_str());
+                        }
                     }
                     
                 },

@@ -16,6 +16,7 @@ pub struct State {
     pub palettes: Vec<Color>,//TODO: Multiple palettes
     pub input: Vec<Input>,
     pub args: Vec<Arg>,
+    pub input_buffer: String,
 }
 
 impl State {
@@ -35,6 +36,7 @@ impl State {
             ],
             input: Vec::new(),
             args: Vec::new(),
+            input_buffer: String::new(),
         }
     }
 }

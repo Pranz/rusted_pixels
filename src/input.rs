@@ -22,7 +22,7 @@ pub enum Input {
     Integer,
     Color,
     String,
-    Exact(&'static str),
+    Exact(String)
 }
 
 pub enum Arg {
@@ -41,15 +41,20 @@ pub enum Command {
     Quit,
 }
 
-pub static COMMANDS: &'static [(&'static [Input], Command)] =
-    &[(&[Input::Char(ExtendedChar::CtrlModified(Keycode::S))],
-       Command::ExportPng),
-      (&[Input::Char(ExtendedChar::AltModified(Keycode::X)),
-         Input::Exact("export-png")],
-       Command::ExportPng),
-      (&[Input::Char(ExtendedChar::CtrlModified(Keycode::Q))],
-       Command::Quit)
-    ];
+pub fn get_commands() -> Vec<(Vec<Input>, Command)> {
+    vec![(vec![Input::Char(ExtendedChar::CtrlModified(Keycode::S))],
+          Command::ExportPng),
+         (vec![Input::Char(ExtendedChar::AltModified(Keycode::X)),
+               Input::Exact(String::from("export-png"))],
+          Command::ExportPng),
+         (vec![Input::Char(ExtendedChar::CtrlModified(Keycode::Q))],
+          Command::Quit),
+         (vec![Input::Char(ExtendedChar::AltModified(Keycode::X)),
+               Input::Exact(String::from("quit"))],
+          Command::Quit)
+    ]
+}
+
 
 pub enum InterpretErr {
     NoValidCommand,
@@ -57,12 +62,15 @@ pub enum InterpretErr {
 }
 
 
-pub fn interpret_input(input: &[Input]) -> Result<Command, InterpretErr> {
+pub fn interpret_input(input: &[Input],
+                       commands: &[(Vec<Input>, Command)])
+                                   -> Result<Command, InterpretErr> {
     let mut has_match = false;
-    for &(inputstack, command) in COMMANDS {
-        if input == &inputstack[0..input.len()] {
+    for &(ref inputstack, command) in commands {
+        if input.len() <= inputstack.len() &&
+            input == &inputstack[0..input.len()] {
             has_match = true;
-            if input == inputstack {
+            if input == inputstack.as_slice() {
                 return Ok(command);
             }
         }
@@ -80,13 +88,15 @@ pub enum CommandResult {
     Success,
 }
 
-pub fn execute_command(state: &mut State) -> CommandResult {
+pub fn execute_command(state: &mut State,
+                       commands: &[(Vec<Input>, Command)])
+-> CommandResult {
     pub fn clean_input_and_args(state: &mut State) {
         state.args = Vec::new();
         state.input = Vec::new();
     }
     
-    match interpret_input(&state.input) {
+    match interpret_input(&state.input, commands) {
         Ok(command) => match command {
             Command::ExportPng => {
                 state.images[0].save_png_image("test_out.png").unwrap();
@@ -106,5 +116,39 @@ pub fn execute_command(state: &mut State) -> CommandResult {
         Err(InterpretErr::RequiresMoreInput) => {
             CommandResult::RequiresMoreInput
         }
+    }
+}
+
+pub fn keycode_to_char(keycode: Keycode) -> Option<char> {
+    match keycode {
+        Keycode::A => Some('a'),
+        Keycode::B => Some('b'),
+        Keycode::C => Some('c'),
+        Keycode::D => Some('d'),
+        Keycode::E => Some('e'),
+        Keycode::F => Some('f'),
+        Keycode::G => Some('g'),
+        Keycode::H => Some('h'),
+        Keycode::I => Some('i'),
+        Keycode::J => Some('j'),
+        Keycode::K => Some('k'),
+        Keycode::L => Some('l'),
+        Keycode::M => Some('m'),
+        Keycode::N => Some('n'),
+        Keycode::O => Some('o'),
+        Keycode::P => Some('p'),
+        Keycode::Q => Some('q'),
+        Keycode::R => Some('r'),
+        Keycode::S => Some('s'),
+        Keycode::T => Some('t'),
+        Keycode::U => Some('u'),
+        Keycode::V => Some('v'),
+        Keycode::W => Some('w'),
+        Keycode::X => Some('x'),
+        Keycode::Y => Some('y'),
+        Keycode::Z => Some('z'),
+        Keycode::Quote => Some('\''),
+        Keycode::Minus => Some('-'),
+        _ => None,
     }
 }
