@@ -1,13 +1,6 @@
 use sdl2::pixels::Color;
-use sdl2::keyboard::Keycode;
+use sdl2::keyboard::{Keycode,Mod,LALTMOD,LCTRLMOD};
 use state::State;
-
-#[derive(PartialEq)]
-pub enum ExtendedChar {
-    NonModified(Keycode),
-    CtrlModified(Keycode),
-    AltModified(Keycode),
-}
 
 /*
  * Veeery emacs inspired. Basically a emacs-like commando like
@@ -18,7 +11,7 @@ pub enum ExtendedChar {
 
 #[derive(PartialEq)]
 pub enum Input {
-    Char(ExtendedChar),
+    Char(Keycode,Mod),
     Integer,
     Color,
     String,
@@ -47,16 +40,15 @@ pub enum Command {
     Quit,
 }
 
-pub const META_X: Input
-    = Input::Char(ExtendedChar::AltModified(Keycode::X)); 
+const META_X: Input = Input::Char(Keycode::X,LALTMOD);
 
 pub fn get_commands() -> Vec<(Vec<Input>, Command)> {
-    vec![(vec![Input::Char(ExtendedChar::CtrlModified(Keycode::S))],
+    vec![(vec![Input::Char(Keycode::S,LCTRLMOD)],
           Command::ExportPng),
          (vec![META_X,
                Input::Exact(String::from("export-png"))],
           Command::ExportPng),
-         (vec![Input::Char(ExtendedChar::CtrlModified(Keycode::Q))],
+         (vec![Input::Char(Keycode::Q,LCTRLMOD)],
           Command::Quit),
          (vec![META_X,
                Input::Exact(String::from("quit"))],
@@ -67,7 +59,6 @@ pub fn get_commands() -> Vec<(Vec<Input>, Command)> {
           Command::Print)
     ]
 }
-
 
 pub enum InterpretErr {
     NoValidCommand,
@@ -123,7 +114,7 @@ pub fn execute_command(state: &mut State,
     match interpret_input(&state.input, commands) {
         Ok(command) => match command {
             Command::ExportPng => {
-                state.images[0].save_png_image("test_out.png").unwrap();
+                state.images[0].save_png_image("tmp/test_out.png").unwrap();
                 println!("exported png");
                 clean_input_and_args(state);
                 CommandResult::Success

@@ -1,5 +1,7 @@
 extern crate sdl2;
 extern crate png;
+#[macro_use]extern crate bitflags;
+
 
 use sdl2::pixels::Color;
 use sdl2::event::Event;
@@ -41,7 +43,7 @@ pub fn main() {
         ImageBuffer::new(32,64)
     ], ..State::new()};
 
-    let mut windows: Vec<Box<Window>> =
+    let windows: Vec<Box<Window>> =
         vec![Box::new(DrawingWindow::new(50, 50, 8,
                                          Color::RGB(100, 100, 100), 0)),
              Box::new(PreviewWindow(
@@ -83,24 +85,9 @@ pub fn main() {
                     state.images[0].save_png_image("test_out.png").unwrap();
                 },*/
                 Event::KeyDown { keycode: Some(keycode), keymod, .. } => {
-                    use sdl2::keyboard::{LCTRLMOD, LALTMOD};
-
                     // every command begins with a single key
                     if state.input.is_empty() {
-                        match keymod {
-                            LCTRLMOD => {
-                                state.input.push(
-                                    Input::Char(ExtendedChar::CtrlModified(keycode)));
-                            },
-                            LALTMOD => {
-                                state.input.push(
-                                    Input::Char(ExtendedChar::AltModified(keycode)));
-                            },
-                            _ => {
-                                state.input.push(
-                                    Input::Char(ExtendedChar::NonModified(keycode)));
-                            }
-                        }
+                        state.input.push(Input::Char(keycode,keymod));
                         match execute_command(&mut state, &commands) {
                             CommandResult::Quit => { break 'main_loop },
                             _ => {}
@@ -134,7 +121,6 @@ pub fn main() {
                             println!("{:?}", state.input_buffer.as_str());
                         }
                     }
-                    
                 },
                 _ => {}
             }
