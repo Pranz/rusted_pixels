@@ -3,9 +3,12 @@ use sdl2::pixels::Color;
 pub fn parse_color(string: &str) -> Option<Color> {
     if string.starts_with("rgb ") {
         
-        let splitted = string[4..]
+        let filtered = string[4..]
+            .chars()
+            .filter(|c| *c != ' ')
+            .collect::<String>();
+        let splitted = filtered
             .split(',')
-            .into_iter()
             .collect::<Vec<&str>>();
         
         if splitted.len() == 3 {
@@ -16,9 +19,12 @@ pub fn parse_color(string: &str) -> Option<Color> {
         }
     } else if string.starts_with("rgba ") {
         
-        let splitted = string[5..]
+        let filtered = string[5..]
+            .chars()
+            .filter(|c| *c != ' ')
+            .collect::<String>();
+        let splitted = filtered
             .split(',')
-            .into_iter()
             .collect::<Vec<&str>>();
         
         if splitted.len() == 4 {
