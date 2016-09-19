@@ -55,7 +55,8 @@ pub fn get_commands() -> Vec<(Vec<Input>, Command)> {
     vec![(vec![Input::Char(Keycode::S,LCTRLMOD)],
           Command::ExportPng),
          (vec![META_X,
-               Input::Exact(String::from("export-png"))],
+               Input::Exact(String::from("export-png")),
+               Input::String],
           Command::ExportPng),
          (vec![Input::Char(Keycode::Q,LCTRLMOD)],
           Command::Quit),
@@ -127,7 +128,10 @@ pub fn execute_command(state: &mut State,
     match interpret_input(&state.input, commands) {
         Ok(command) => match command {
             Command::ExportPng => {
-                state.images[0].save_png_image("tmp/test_out.png").unwrap();
+                let out = state.args.pop()
+                    .unwrap_or(Arg::String(String::from("tmp/test_out.png")))
+                    .coerce_string();
+                state.images[0].save_png_image(out).unwrap();
                 println!("exported png");
                 clean_input_and_args(state);
                 CommandResult::Success
@@ -191,6 +195,8 @@ pub fn keycode_to_char(keycode: Keycode) -> Option<char> {
         Keycode::Minus => Some('-'),
         Keycode::Space => Some(' '),
         Keycode::Comma => Some(','),
+        Keycode::Slash => Some('/'),
+        Keycode::Period => Some('.'),
         Keycode::Num0  => Some('0'),
         Keycode::Num1  => Some('1'),
         Keycode::Num2  => Some('2'),
