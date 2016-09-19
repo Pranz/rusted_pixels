@@ -1,6 +1,7 @@
 use sdl2::pixels::Color;
 use sdl2::keyboard::{Keycode,Mod,LALTMOD,LCTRLMOD};
 use state::State;
+use util;
 
 /*
  * Veeery emacs inspired. Basically a emacs-like commando like
@@ -31,6 +32,13 @@ impl Arg {
         }
         panic!("Commands misconfigured. Expected `String` on stack.");
     }
+
+    pub fn coerce_color(self) -> Color {
+        if let Arg::Color(color) = self {
+            return color;
+        }
+        panic!("Commands misconfigured. Expected `Color` on stack.");
+    }
 }
 
 #[derive(Copy, Clone)]
@@ -38,6 +46,7 @@ pub enum Command {
     ExportPng,
     Print,
     Quit,
+    SetColor,
 }
 
 const META_X: Input = Input::Char(Keycode::X,LALTMOD);
@@ -56,7 +65,11 @@ pub fn get_commands() -> Vec<(Vec<Input>, Command)> {
          (vec![META_X,
                Input::Exact(String::from("print")),
                Input::String],
-          Command::Print)
+          Command::Print),
+         (vec![META_X,
+               Input::Exact(String::from("set-color")),
+               Input::Color],
+          Command::SetColor),
     ]
 }
 
@@ -128,6 +141,13 @@ pub fn execute_command(state: &mut State,
                 clean_input_and_args(state);
                 CommandResult::Success
             },
+            Command::SetColor => {
+                let color = state.args.pop().unwrap().coerce_color();
+                state.current_color = color;
+                clean_input_and_args(state);
+                println!("set color");
+                CommandResult::Success
+            }
         },
         Err(InterpretErr::NoValidCommand) => {
             clean_input_and_args(state);
@@ -170,6 +190,17 @@ pub fn keycode_to_char(keycode: Keycode) -> Option<char> {
         Keycode::Quote => Some('\''),
         Keycode::Minus => Some('-'),
         Keycode::Space => Some(' '),
+        Keycode::Comma => Some(','),
+        Keycode::Num0  => Some('0'),
+        Keycode::Num1  => Some('1'),
+        Keycode::Num2  => Some('2'),
+        Keycode::Num3  => Some('3'),
+        Keycode::Num4  => Some('4'),
+        Keycode::Num5  => Some('5'),
+        Keycode::Num6  => Some('6'),
+        Keycode::Num7  => Some('7'),
+        Keycode::Num8  => Some('8'),
+        Keycode::Num9  => Some('9'),
         _ => None,
     }
 }
@@ -182,12 +213,16 @@ pub fn parse_input(input: &str) -> (Input, Option<Arg>) {
     if let Ok(integer) = input.parse::<isize>() {
         (Input::Integer, Some(Arg::Integer(integer)))
     }
-    else if input.len() > 1 &&
-        input.starts_with('\'') &&
-        input.as_bytes()[input.len() - 1] == b'\'' {
-            (Input::String, Some(Arg::String(
-                input[1..(input.len() - 1)].to_string())))
+    else if input.len() > 1
+        && input.starts_with('\'')
+        && input.as_bytes()[input.len() - 1] == b'\'' {
+            // remove quotation marks
+            let parsed_string = input[1..(input.len() - 1)].to_string();
+            (Input::String, Some(Arg::String(parsed_string)))
         }
+    else if let Some(color) = util::parse_color(input) {
+        (Input::Color, Some(Arg::Color(color)))
+    }
     else {
         (Input::Exact(input.to_string()), None)
     }

@@ -14,6 +14,7 @@ pub mod image_buffer;
 pub mod windows;
 pub mod state;
 pub mod input;
+pub mod util;
 
 use input::*;
 

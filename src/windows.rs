@@ -152,7 +152,7 @@ impl Window for PaletteWindow{
         let palette_x1 = self.x+PALETTEWINDOW_PADDING_PX;
         let palette_x2 = self.x+PALETTEWINDOW_PADDING_PX + PALETTEWINDOW_COLORS_PER_ROW*PALETTEWINDOW_COLOR_SQUARE_PX;
         let palette_y1 = self.y+PALETTEWINDOW_PADDING_PX;
-        let palette_y2 = self.y+PALETTEWINDOW_PADDING_PX + (state.palettes.len() as f32/PALETTEWINDOW_COLORS_PER_ROW as f32).ceil() as usize*PALETTEWINDOW_COLOR_SQUARE_PX;
+        let palette_y2 = self.y+PALETTEWINDOW_PADDING_PX + (state.current_palette().len() as f32/PALETTEWINDOW_COLORS_PER_ROW as f32).ceil() as usize*PALETTEWINDOW_COLOR_SQUARE_PX;
 
         if mouse_x as usize>=palette_x1 && mouse_x as usize<=palette_x2
         && mouse_y as usize>=palette_y1 && mouse_y as usize<=palette_y2{
