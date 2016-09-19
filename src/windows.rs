@@ -160,9 +160,9 @@ impl Window for PaletteWindow{
             let palette_y = (mouse_y as usize-palette_y1)/PALETTEWINDOW_COLOR_SQUARE_PX;
             let palette_id = palette_x%PALETTEWINDOW_COLORS_PER_ROW + palette_y*PALETTEWINDOW_COLORS_PER_ROW;
 
-            if let Some(color) = state.palettes.get(palette_id){
-                state.current_color = *color;
-            }
+            state.current_color = if let Some(color) = state.current_palette().get(palette_id) {
+                *color
+            } else { state.current_color }
         }
     }
 
@@ -172,10 +172,10 @@ impl Window for PaletteWindow{
             self.x as i32,
             self.y as i32,
             (PALETTEWINDOW_COLORS_PER_ROW * PALETTEWINDOW_COLOR_SQUARE_PX + 2*PALETTEWINDOW_PADDING_PX) as u32,
-            ((state.palettes.len() as f32 / PALETTEWINDOW_COLORS_PER_ROW as f32).ceil() as usize * PALETTEWINDOW_COLOR_SQUARE_PX + 2*PALETTEWINDOW_PADDING_PX) as u32,
+            ((state.current_palette().len() as f32 / PALETTEWINDOW_COLORS_PER_ROW as f32).ceil() as usize * PALETTEWINDOW_COLOR_SQUARE_PX + 2*PALETTEWINDOW_PADDING_PX) as u32,
         )).ok();
 
-        for (i,color) in state.palettes.iter().enumerate(){
+        for (i,color) in state.current_palette().iter().enumerate(){
             renderer.set_draw_color(*color);
             renderer.fill_rect(Rect::new((PALETTEWINDOW_PADDING_PX as usize + self.x + (i%PALETTEWINDOW_COLORS_PER_ROW as usize)*PALETTEWINDOW_COLOR_SQUARE_PX as usize) as i32,
                                          (PALETTEWINDOW_PADDING_PX as usize + self.y + (i/PALETTEWINDOW_COLORS_PER_ROW as usize)*PALETTEWINDOW_COLOR_SQUARE_PX as usize) as i32,

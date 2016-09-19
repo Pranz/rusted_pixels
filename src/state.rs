@@ -13,7 +13,8 @@ pub struct State {
     pub mouse_x: i32,
     pub mouse_y: i32,
     pub images: Vec<ImageBuffer>,
-    pub palettes: Vec<Color>,//TODO: Multiple palettes
+    pub current_palette_index: usize,
+    pub palettes: Vec<Vec<Color>>,//TODO: Multiple palettes
     pub input: Vec<Input>,
     pub args: Vec<Arg>,
     pub input_buffer: String,
@@ -28,15 +29,21 @@ impl State {
             mouse_x: 0,
             mouse_y: 0,
             images: vec![],
-            palettes: vec![
+            current_palette_index: 0,
+            palettes: vec![vec![
                 Color::RGB(0,0,0),
                 Color::RGB(128,128,128),
                 Color::RGB(255,255,255),
                 Color::RGB(192,128,112),
-            ],
+            ]],
             input: Vec::new(),
             args: Vec::new(),
             input_buffer: String::new(),
         }
+    }
+
+    #[inline(always)]
+    pub fn current_palette<'a>(&'a self) -> &'a [Color] {
+        &self.palettes[self.current_palette_index]
     }
 }
