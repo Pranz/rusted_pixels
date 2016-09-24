@@ -1,4 +1,5 @@
 extern crate sdl2;
+extern crate sdl2_ttf;
 extern crate png;
 #[macro_use]extern crate bitflags;
 
@@ -82,9 +83,6 @@ pub fn main() {
                 Event::MouseButtonUp { mouse_btn: Mouse::Left, .. } => {
                     state.left_mouse_down = false;
                 },
-                /*Event::KeyDown { keycode: Some(Keycode::S), keymod: sdl2::keyboard::LCTRLMOD, .. } => {
-                    state.images[0].save_png_image("test_out.png").unwrap();
-                },*/
                 Event::KeyDown { keycode: Some(keycode), keymod, .. } => {
                     // every command begins with a single key
                     if state.input.is_empty() {

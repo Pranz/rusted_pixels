@@ -118,39 +118,20 @@ pub enum CommandResult {
  * and await more user input
  */
 pub fn execute_command(state: &mut State,
-                       commands: &[(Vec<Input>, Command)])
--> CommandResult {
+                       commands: &[(Vec<Input>, Command)]) -> CommandResult {
     pub fn clean_input_and_args(state: &mut State) {
         state.args = Vec::new();
         state.input = Vec::new();
     }
-    
+        
     match interpret_input(&state.input, commands) {
-        Ok(command) => match command {
-            Command::ExportPng => {
-                let out = state.args.pop()
-                    .unwrap_or(Arg::String(String::from("tmp/test_out.png")))
-                    .coerce_string();
-                state.images[0].save_png_image(out).unwrap();
-                println!("exported png");
-                clean_input_and_args(state);
-                CommandResult::Success
-            },
-            Command::Quit => {
-                println!("quit succesfully");
-                CommandResult::Quit
-            },
-            Command::Print => {
-                println!("{}", state.args.pop().unwrap().coerce_string());
-                clean_input_and_args(state);
-                CommandResult::Success
-            },
-            Command::SetColor => {
-                let color = state.args.pop().unwrap().coerce_color();
-                state.current_color = color;
-                clean_input_and_args(state);
-                println!("set color");
-                CommandResult::Success
+        Ok(command) =>  {
+            match select_command(state, command) {
+                CommandResult::Success => {
+                    clean_input_and_args(state);
+                    CommandResult::Success
+                },
+                anythingElse => anythingElse
             }
         },
         Err(InterpretErr::NoValidCommand) => {
@@ -160,6 +141,51 @@ pub fn execute_command(state: &mut State,
         Err(InterpretErr::RequiresMoreInput) => {
             CommandResult::RequiresMoreInput
         }
+    }
+}
+
+fn select_command(state: &mut State, command: Command) -> CommandResult {
+    match command {
+        Command::ExportPng => {
+            commands::export_png(state)
+        },
+        Command::Quit => {
+            println!("quit succesfully");
+            CommandResult::Quit
+            },
+        Command::Print => {
+            commands::print(state)
+        },
+        Command::SetColor => {
+            commands::set_color(state)
+        },
+    }
+}
+
+
+pub mod commands {
+    use super::CommandResult;
+    use super::Arg;
+    use ::state::State;
+    pub fn set_color(state: &mut State) -> CommandResult {
+        let color = state.args.pop().unwrap().coerce_color();
+        state.current_color = color;
+        println!("set color");
+        CommandResult::Success
+    }
+
+    pub fn export_png(state: &mut State) -> CommandResult {
+       let out = state.args.pop()
+            .unwrap_or(Arg::String(String::from("tmp/test_out.png")))
+            .coerce_string();
+        state.images[0].save_png_image(out).unwrap();
+        println!("exported png");
+        CommandResult::Success 
+    }
+
+    pub fn print(state: &mut State) -> CommandResult {
+        println!("{}", state.args.pop().unwrap().coerce_string());
+        CommandResult::Success
     }
 }
 
@@ -219,13 +245,9 @@ pub fn parse_input(input: &str) -> (Input, Option<Arg>) {
     if let Ok(integer) = input.parse::<isize>() {
         (Input::Integer, Some(Arg::Integer(integer)))
     }
-    else if input.len() > 1
-        && input.starts_with('\'')
-        && input.as_bytes()[input.len() - 1] == b'\'' {
-            // remove quotation marks
-            let parsed_string = input[1..(input.len() - 1)].to_string();
-            (Input::String, Some(Arg::String(parsed_string)))
-        }
+    else if let Some(string) = parse_string(input) {
+        (Input::String, Some(Arg::String(string)))
+    }
     else if let Some(color) = util::parse_color(input) {
         (Input::Color, Some(Arg::Color(color)))
     }
@@ -234,3 +256,13 @@ pub fn parse_input(input: &str) -> (Input, Option<Arg>) {
     }
 }
 
+pub fn parse_string(input: &str) -> Option<String> {
+    if input.len() > 1
+        && input.starts_with('\'')
+        && input.as_bytes()[input.len() - 1] == b'\''
+    {
+        // remove quotation marks
+        Some(input[1..(input.len() - 1)].to_string())
+    }
+    else { None }
+}
