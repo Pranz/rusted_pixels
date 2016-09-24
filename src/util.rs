@@ -2,9 +2,9 @@ use sdl2::pixels::Color;
 
 pub fn parse_color(string: &str) -> Option<Color> {
     if string.starts_with("rgb ") {
-        parse_rgb(string[4..])
+        parse_rgb(&string[4..])
     } else if string.starts_with("rgba ") {
-        parse_rgba(string[5..])
+        parse_rgba(&string[5..])
     } else if string.starts_with('#') {
         //TODO: hexadecimal conversion
         None
@@ -13,8 +13,8 @@ pub fn parse_color(string: &str) -> Option<Color> {
     }
 }
 
-pub fn parse_rgb(string: &str) {
-    string
+pub fn parse_rgb(string: &str) -> Option<Color> {
+    let filtered = string
         .chars()
         .filter(|c| *c != ' ')
         .collect::<String>();
@@ -28,10 +28,11 @@ pub fn parse_rgb(string: &str) {
                                         splitted[2].parse::<u8>())
         { return Some(Color::RGB(r,g,b)); }
     }
+    None
 }
 
-pub fn parse_rgba(string: &str) {
-    string
+pub fn parse_rgba(string: &str) -> Option<Color> {
+    let filtered = string
         .chars()
         .filter(|c| *c != ' ')
         .collect::<String>();
@@ -47,4 +48,5 @@ pub fn parse_rgba(string: &str) {
                splitted[3].parse::<u8>())
         { return Some(Color::RGBA(r,g,b,a)); }
     }
+    None
 }
