@@ -131,7 +131,7 @@ pub fn execute_command(state: &mut State,
                     clean_input_and_args(state);
                     CommandResult::Success
                 },
-                anythingElse => anythingElse
+                anything_else => anything_else
             }
         },
         Err(InterpretErr::NoValidCommand) => {
