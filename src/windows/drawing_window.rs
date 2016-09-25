@@ -1,6 +1,7 @@
 use sdl2::render::Renderer;
 use sdl2::pixels::Color;
 use sdl2::rect::*;
+use sdl2_ttf::Font;
 
 use image_buffer::ImageBuffer;
 use state::State;
@@ -19,7 +20,6 @@ pub struct DrawingWindow {
 }
 
 impl DrawingWindow {
-
     #[inline(always)]
     pub fn new(x: usize, y: usize, scale: usize, background: Color,
                image_id: usize)
@@ -33,8 +33,6 @@ impl DrawingWindow {
             image_id: image_id,
         }
     }
-    
-    
 
     pub fn in_range(&self, image: &ImageBuffer, x: i32, y: i32) -> bool {
         /*
@@ -65,8 +63,6 @@ impl DrawingWindow {
         }
         else { None }
     }
-
-    
 }
 
 impl Window for DrawingWindow {
@@ -79,7 +75,7 @@ impl Window for DrawingWindow {
         }
     }
 
-    fn draw<'a>(&self, renderer: &mut Renderer<'a>, state: &State) {
+    fn draw<'a>(&self, renderer: &mut Renderer<'a>, _: &mut Font, state: &State) {
         let image = &state.images[self.image_id];
         
         renderer.set_draw_color(self.background);

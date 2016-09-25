@@ -3,6 +3,7 @@ extern crate sdl2_ttf;
 extern crate png;
 #[macro_use]extern crate bitflags;
 
+use std::path::Path;
 
 use sdl2::pixels::Color;
 use sdl2::event::Event;
@@ -27,10 +28,14 @@ use windows::*;
 
 pub fn main() {
     let sdl_context = sdl2::init().unwrap();
+    let ttf_context = sdl2_ttf::init().unwrap();
     let window = init_sdl_window(&sdl_context);
     
     let mut renderer = window.renderer().present_vsync().build().unwrap();
     renderer.set_blend_mode(BlendMode::Blend);
+    
+    let font_path = Path::new("fonts/SourceCodePro_Regular.ttf");
+    let mut font = ttf_context.load_font(font_path, 128).unwrap();
 
     let commands = input::get_commands();
     let windows: Vec<Box<Window>> = initialize_windows();
@@ -71,7 +76,7 @@ pub fn main() {
         renderer.set_draw_color(Color::RGB(255,255,255));
 
         for window in &windows {
-            window.draw(&mut renderer, &state);
+            window.draw(&mut renderer, &mut font, &state);
         }
 
         renderer.present();
@@ -144,7 +149,8 @@ fn initialize_windows() -> Vec<Box<Window>> {
     vec![Box::new(DrawingWindow::new(50, 50, 8, lighter_gray, 0)),
          Box::new(PreviewWindow(DrawingWindow::new(400, 50, 1, gray, 0))),
          Box::new(DrawingWindow::new(400, 400, 2, gray, 0)),
-         Box::new(PaletteWindow{x: 400,y: 100,palette_id: 0})]
+         Box::new(PaletteWindow{x: 400,y: 100,palette_id: 0}),
+         Box::new(StatusWindow::new())]
 }
 
 fn init_sdl_window(sdl_context: &Sdl) -> SdlWindow {

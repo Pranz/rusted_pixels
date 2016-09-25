@@ -1,6 +1,7 @@
 use sdl2::render::Renderer;
 use sdl2::pixels::Color;
 use sdl2::rect::*;
+use sdl2_ttf::Font;
 
 use state::State;
 use windows::Window; 
@@ -35,7 +36,7 @@ impl Window for PaletteWindow{
         }
     }
 
-    fn draw<'a>(&self, renderer: &mut Renderer<'a>, state: &State) {
+    fn draw<'a>(&self, renderer: &mut Renderer<'a>, _: &mut Font, state: &State) {
         renderer.set_draw_color(Color::RGB(48,48,48));
         renderer.fill_rect(Rect::new(
             self.x as i32,
