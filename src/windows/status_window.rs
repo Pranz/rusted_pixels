@@ -37,11 +37,20 @@ impl Window for StatusWindow {
         
         renderer.set_draw_color(self.background_color);
         renderer.fill_rect(rect).ok();
-        let surface = font.render("Hello world!")
+
+        let text = state.show_input_stack();
+        let surface = font.render(&text)
             .blended(self.font_color).unwrap();
         let mut texture = renderer.create_texture_from_surface(&surface).unwrap();
 
-        renderer.copy(&mut texture, None, Some(rect));
+        let (font_width, font_height) = font.size_of(&text).unwrap();
+        let font_rect = Rect::new(
+            0,
+            (window_height - self.height) as i32,
+            font_width / 8, 
+            font_height / 8);
+
+        renderer.copy(&mut texture, None, Some(font_rect));
         renderer.present();
     }
 }

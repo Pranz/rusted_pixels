@@ -105,6 +105,10 @@ fn handle_mouse_motion(state: &mut State, windows: &[Box<Window>],
 fn handle_key_down(state: &mut State, commands: &[(Vec<Input>, Command)],
                    keycode: Keycode, keymod: Mod) -> bool {
     // every command begins with a single key
+    if keycode == Keycode::Backspace {
+        state.input_buffer.pop();
+        return false;
+    }
     if state.input.is_empty() {
         state.input.push(Input::Char(keycode,keymod));
         match execute_command(state, commands) {
@@ -137,7 +141,6 @@ fn handle_key_down(state: &mut State, commands: &[(Vec<Input>, Command)],
     else {
         if let Some(chr) = input::keycode_to_char(keycode) {
             state.input_buffer.push(chr);
-            println!("{:?}", state.input_buffer.as_str());
         }
     }
     return false;

@@ -26,18 +26,25 @@ pub enum Arg {
 }
 
 impl Arg {
-    pub fn coerce_string(self) -> String {
-        if let Arg::String(string) = self {
-            return string;
+    pub fn coerce_string(&self) -> String {
+        if let Arg::String(ref string) = *self {
+            return string.clone();
         }
         panic!("Commands misconfigured. Expected `String` on stack.");
     }
 
-    pub fn coerce_color(self) -> Color {
-        if let Arg::Color(color) = self {
+    pub fn coerce_color(&self) -> Color {
+        if let Arg::Color(color) = *self {
             return color;
         }
         panic!("Commands misconfigured. Expected `Color` on stack.");
+    }
+
+    pub fn coerce_integer(&self) -> isize {
+        if let Arg::Integer(integer) = *self {
+            return integer;
+        }
+        panic!("Commands misconfigured. Expected `Integer` on stack.");
     }
 }
 

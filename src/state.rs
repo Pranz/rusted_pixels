@@ -1,7 +1,8 @@
 
 use sdl2::pixels::Color;
+use sdl2::keyboard::{Keycode,Mod,LALTMOD,LCTRLMOD};
 use image_buffer::ImageBuffer;
-use input::{Input, Arg};
+use input::{Input, Arg, keycode_to_char};
 
 /*
  * Holds the main state, pretty self explanatory.
@@ -45,5 +46,51 @@ impl State {
     #[inline(always)]
     pub fn current_palette<'a>(&'a self) -> &'a [Color] {
         &self.palettes[self.current_palette_index]
+    }
+
+    pub fn show_input_stack(&self) -> String {
+        fn mod_to_string(modifier: Mod) -> &'static str {
+            match modifier {
+                LALTMOD => "M-",
+                LCTRLMOD => "C-",
+                _ => "",
+            }
+        }
+        
+        let mut string = String::new();
+        let mut count = 0;
+        for input in &self.input {
+            match *input {
+                Input::Char(keycode, modifier) => {
+                    string = string + mod_to_string(modifier);
+                    string.push(keycode_to_char(keycode).unwrap_or(' '));
+                },
+                Input::Integer => {
+                    string = string + &self.args[count].coerce_integer().to_string();
+                    count += 1;
+                },
+                Input::Exact(ref exact_phrase) => {
+                    string = string + exact_phrase;
+                },
+                Input::String => {
+                    string = string + &self.args[count].coerce_string();
+                    count += 1;
+                },
+                Input::Color => {
+                    let color = &self.args[count].coerce_color();
+                    if let Color::RGB(r,g,b) = *color {
+                        string = string + "rgb(" + &r.to_string() + "," + &g.to_string() + ","
+                            + &r.to_string() + ")"
+                    } else if let Color::RGBA(r,g,b,a) = *color {
+                        string = string + "rgb(" + &r.to_string() + "," + &g.to_string() + ","
+                            + &r.to_string() + "," + &a.to_string() + ")"
+                    }
+                    count += 1;
+                }
+            }
+            string = string + " ";
+        }
+        string = string + " " + &self.input_buffer;
+        return string;
     }
 }
