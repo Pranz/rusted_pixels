@@ -38,7 +38,7 @@ pub fn main() {
     let mut font = ttf_context.load_font(font_path, 128).unwrap();
 
     let commands = input::get_commands();
-    let windows: Vec<Box<Window>> = initialize_windows();
+    let mut windows: Vec<Box<Window>> = initialize_windows();
     let mut state = State{images: vec![
         ImageBuffer::load_png_image(&path::PathBuf::from("test.png")).unwrap(),
         ImageBuffer::new(32,64)
@@ -63,7 +63,8 @@ pub fn main() {
                     state.left_mouse_down = false;
                 },
                 Event::KeyDown { keycode: Some(keycode), keymod, .. } => {
-                    if handle_key_down(&mut state, &commands, keycode, keymod) {
+                    if handle_key_down(&mut state, windows.as_mut() , &commands,
+                                       keycode, keymod) {
                         break 'main_loop;
                     }
                 },
@@ -102,7 +103,7 @@ fn handle_mouse_motion(state: &mut State, windows: &[Box<Window>],
     }
 }
 
-fn handle_key_down(state: &mut State, commands: &[(Vec<Input>, Command)],
+fn handle_key_down(state: &mut State, windows: &mut [Box<Window>], commands: &[(Vec<Input>, Command)],
                    keycode: Keycode, keymod: Mod) -> bool {
     // every command begins with a single key
     if keycode == Keycode::Backspace {
@@ -111,7 +112,7 @@ fn handle_key_down(state: &mut State, commands: &[(Vec<Input>, Command)],
     }
     if state.input.is_empty() {
         state.input.push(Input::Char(keycode,keymod));
-        match execute_command(state, commands) {
+        match execute_command(state, windows, commands) {
             CommandResult::Quit => { return true },
             _ => {}
         }
@@ -133,7 +134,7 @@ fn handle_key_down(state: &mut State, commands: &[(Vec<Input>, Command)],
             state.args.push(arg);
         }
                         state.input_buffer = String::new();
-        match execute_command(state, commands) {
+        match execute_command(state, windows, commands) {
             CommandResult::Quit => { return true },
             _ => {}
         }

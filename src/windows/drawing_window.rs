@@ -96,4 +96,12 @@ impl Window for DrawingWindow {
             }
         }
     }
+
+    fn increment_scale(&mut self) {
+        self.scale = (self.scale + 1) % 32;
+    }
+
+    fn decrement_scale(&mut self) {
+        self.scale = ((self.scale as isize + 31) % 32) as usize;
+    }
 }

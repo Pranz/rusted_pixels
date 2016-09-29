@@ -23,5 +23,7 @@ pub use self::status_window::StatusWindow;
 pub trait Window {
     fn draw<'a>(&self, renderer: &mut Renderer<'a>, font: &mut Font, state: &State);
     fn handle_mouse_down(&self, state: &mut State, mouse_x:
-                         i32, mouse_y: i32); 
+                         i32, mouse_y: i32);
+    fn increment_scale(&mut self) { }
+    fn decrement_scale(&mut self) { }
 }

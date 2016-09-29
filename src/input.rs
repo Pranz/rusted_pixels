@@ -1,7 +1,8 @@
 use sdl2::pixels::Color;
-use sdl2::keyboard::{Keycode,Mod,LALTMOD,LCTRLMOD};
+use sdl2::keyboard::{Keycode,Mod,LALTMOD,LCTRLMOD, NOMOD};
 use state::State;
 use util;
+use windows::Window;
 
 /*
  * Veeery emacs inspired. Basically a emacs-like commando like
@@ -54,6 +55,8 @@ pub enum Command {
     Print,
     Quit,
     SetColor,
+    ZoomIn,
+    ZoomOut,
 }
 
 const META_X: Input = Input::Char(Keycode::X,LALTMOD);
@@ -78,6 +81,10 @@ pub fn get_commands() -> Vec<(Vec<Input>, Command)> {
                Input::Exact(String::from("set-color")),
                Input::Color],
           Command::SetColor),
+         (vec![Input::Char(Keycode::W, NOMOD)],
+          Command::ZoomOut),
+         (vec![Input::Char(Keycode::F, NOMOD)],
+          Command::ZoomIn),
     ]
 }
 
@@ -124,7 +131,7 @@ pub enum CommandResult {
  * clear the input buffer. Otherwise, do nothing
  * and await more user input
  */
-pub fn execute_command(state: &mut State,
+pub fn execute_command(state: &mut State, windows: &mut [Box<Window>],
                        commands: &[(Vec<Input>, Command)]) -> CommandResult {
     pub fn clean_input_and_args(state: &mut State) {
         state.args = Vec::new();
@@ -133,7 +140,7 @@ pub fn execute_command(state: &mut State,
         
     match interpret_input(&state.input, commands) {
         Ok(command) =>  {
-            match select_command(state, command) {
+            match select_command(state, windows, command) {
                 CommandResult::Success => {
                     clean_input_and_args(state);
                     CommandResult::Success
@@ -151,7 +158,7 @@ pub fn execute_command(state: &mut State,
     }
 }
 
-fn select_command(state: &mut State, command: Command) -> CommandResult {
+fn select_command(state: &mut State, windows: &mut [Box<Window>], command: Command) -> CommandResult {
     match command {
         Command::ExportPng => {
             commands::export_png(state)
@@ -165,6 +172,14 @@ fn select_command(state: &mut State, command: Command) -> CommandResult {
         },
         Command::SetColor => {
             commands::set_color(state)
+        },
+        Command::ZoomIn => {
+            windows[state.window_index].increment_scale();
+            CommandResult::Success
+        },
+        Command::ZoomOut => {
+            windows[state.window_index].decrement_scale();
+            CommandResult::Success
         },
     }
 }

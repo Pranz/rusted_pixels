@@ -19,6 +19,7 @@ pub struct State {
     pub input: Vec<Input>,
     pub args: Vec<Arg>,
     pub input_buffer: String,
+    pub window_index: usize,
 }
 
 impl State {
@@ -40,6 +41,7 @@ impl State {
             input: Vec::new(),
             args: Vec::new(),
             input_buffer: String::new(),
+            window_index: 0,
         }
     }
 
@@ -79,11 +81,13 @@ impl State {
                 Input::Color => {
                     let color = &self.args[count].coerce_color();
                     if let Color::RGB(r,g,b) = *color {
-                        string = string + "rgb(" + &r.to_string() + "," + &g.to_string() + ","
-                            + &r.to_string() + ")"
+                        string = string + "rgb(" + &r.to_string() + ","
+                            + &g.to_string() + ","
+                            + &b.to_string() + ")"
                     } else if let Color::RGBA(r,g,b,a) = *color {
-                        string = string + "rgb(" + &r.to_string() + "," + &g.to_string() + ","
-                            + &r.to_string() + "," + &a.to_string() + ")"
+                        string = string + "rgb(" + &r.to_string()
+                            + "," + &g.to_string() + ","
+                            + &b.to_string() + "," + &a.to_string() + ")"
                     }
                     count += 1;
                 }
