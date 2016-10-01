@@ -9,6 +9,7 @@ git = "https://github.com/Lolirofle/image-png"
 [dependencies]
 sdl2 = "*"
 bitflags = "*"
+time = "0.1"
 
 [dependencies.sdl2_ttf]
 git = "https://github.com/andelf/rust-sdl2_ttf"

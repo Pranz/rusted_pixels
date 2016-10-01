@@ -2,6 +2,7 @@ extern crate sdl2;
 extern crate sdl2_ttf;
 extern crate png;
 #[macro_use]extern crate bitflags;
+extern crate time;
 
 use std::path::Path;
 
@@ -47,6 +48,7 @@ pub fn main() {
     let mut event_pump = sdl_context.event_pump().unwrap();
     
     'main_loop: loop {
+        let start_time = time::get_time();
         for event in event_pump.poll_iter() {
             match event {
                 Event::Quit {..} => {
@@ -81,6 +83,11 @@ pub fn main() {
         }
 
         renderer.present();
+        let time_difference = time::get_time() - start_time;
+        let duration = time::Duration::milliseconds(16) - time_difference;
+        if let Ok(std_duration) = duration.to_std() {
+            std::thread::sleep(std_duration);
+        }
     }
 }
 
