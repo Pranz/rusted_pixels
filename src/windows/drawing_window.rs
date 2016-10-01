@@ -4,7 +4,7 @@ use sdl2::rect::*;
 use sdl2_ttf::Font;
 
 use image_buffer::ImageBuffer;
-use state::State;
+use state::{State, DrawUndo};
 use windows::Window; 
 
 /*
@@ -70,8 +70,23 @@ impl Window for DrawingWindow {
                              mouse_x: i32, mouse_y: i32) {
         let image = &mut state.images[self.image_id];
         let coordinates = self.get_index(&image, mouse_x, mouse_y);
-        if let Some((x,y)) = coordinates {
-            *image.get_mut_ref(x as usize,y as usize) = state.current_color; 
+        if let Some((xx,yy)) = coordinates {
+            if let Some(undo) = state.undo_stack.last_mut() {
+                let has_undo = 
+                    undo.draw_undo
+                    .iter()
+                    .any(|&DrawUndo {image_id, x, y, color}| {
+                        x as i32 == xx && y as i32 == yy
+                    });
+                if !has_undo {
+                    undo.draw_undo
+                        .push(DrawUndo::new(self.image_id,
+                                            xx as usize,
+                                            yy as usize,
+                                            image.get_point(xx as usize, yy as usize)));
+                }
+            }
+            *image.get_mut_ref(xx as usize, yy as usize) = state.current_color; 
         }
     }
 

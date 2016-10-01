@@ -23,7 +23,7 @@ pub mod util;
 use input::*;
 
 use image_buffer::ImageBuffer;
-use state::State;
+use state::{State, Undo};
 use windows::*;
 
 pub fn main() {
@@ -86,6 +86,7 @@ pub fn main() {
 
 fn handle_mouse_left_down(state: &mut State, windows: &[Box<Window>],
                           x: i32, y: i32) {
+    state.undo_stack.push(Undo::new());
     state.left_mouse_down = true;
     for window in windows {
         window.handle_mouse_down(state, x, y);

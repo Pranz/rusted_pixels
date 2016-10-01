@@ -57,6 +57,7 @@ pub enum Command {
     SetColor,
     ZoomIn,
     ZoomOut,
+    Undo,
 }
 
 const META_X: Input = Input::Char(Keycode::X,LALTMOD);
@@ -85,6 +86,8 @@ pub fn get_commands() -> Vec<(Vec<Input>, Command)> {
           Command::ZoomOut),
          (vec![Input::Char(Keycode::F, NOMOD)],
           Command::ZoomIn),
+         (vec![Input::Char(Keycode::Z, LCTRLMOD)],
+          Command::Undo),
     ]
 }
 
@@ -181,6 +184,10 @@ fn select_command(state: &mut State, windows: &mut [Box<Window>], command: Comma
             windows[state.window_index].decrement_scale();
             CommandResult::Success
         },
+        Command::Undo => {
+            state.undo();
+            CommandResult::Success
+        }
     }
 }
 

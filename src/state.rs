@@ -20,6 +20,40 @@ pub struct State {
     pub args: Vec<Arg>,
     pub input_buffer: String,
     pub window_index: usize,
+    pub undo_stack: Vec<Undo>,
+}
+
+/*
+ * Should contain every information needed for an undo.
+ */
+pub struct Undo {
+    pub draw_undo: Vec<DrawUndo>,
+}
+
+impl Undo {
+    pub fn new() -> Undo {
+        Undo {
+            draw_undo: vec![],
+        }
+    }
+}
+
+pub struct DrawUndo {
+    pub image_id: usize,
+    pub x: usize,
+    pub y: usize,
+    pub color: Color,
+}
+
+impl DrawUndo {
+    pub fn new(image_id: usize, x: usize, y: usize, color: Color) -> Self {
+        DrawUndo {
+            image_id: image_id,
+            x: x,
+            y: y,
+            color: color,
+        }
+    }
 }
 
 impl State {
@@ -42,12 +76,22 @@ impl State {
             args: Vec::new(),
             input_buffer: String::new(),
             window_index: 0,
+            undo_stack: vec![],
         }
     }
 
     #[inline(always)]
     pub fn current_palette<'a>(&'a self) -> &'a [Color] {
         &self.palettes[self.current_palette_index]
+    }
+
+    pub fn undo(&mut self) {
+        if let Some(undo) = self.undo_stack.pop() {
+            for DrawUndo {image_id, x, y, color} in undo.draw_undo.into_iter() {
+                let image = &mut self.images[image_id];
+                *image.get_mut_ref(x, y) = color;
+            }
+        }
     }
 
     pub fn show_input_stack(&self) -> String {
