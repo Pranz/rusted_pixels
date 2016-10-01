@@ -49,44 +49,50 @@ impl DrawingWindow {
     }
 
     pub fn get_index(&self, image: &ImageBuffer, x: i32, y: i32) ->
-        Option<(i32, i32)>
+        Option<(usize, usize)>
     {
         /*
          * A window rendering `image`, check what index the absolute 
          * points `x` and `y` corresponds to. For example, if a mouse clicks
          * occurs at point `(x,y)`, which image pixel was targeted?
          */
-        if self.in_range(image, x, y) {
+        if self.in_range(image, x, y) && x >= 0 && y >= 0 {
             let (win_x, win_y, scale) =
                 (self.x as i32, self.y as i32, self.scale as i32);
-            Some(((x - win_x) / scale, (y - win_y) / scale))
+            let index_x = ((x - win_x) / scale) as usize;
+            let index_y = ((y - win_y) / scale) as usize;
+            Some((index_x, index_y))
         }
         else { None }
+    }
+
+    pub fn save_undo(&self, state: &mut State, target_x: usize, target_y: usize, color: Color) {
+        if let Some(undo) = state.undo_stack.last_mut() {
+            let has_previous_undo = undo
+                .draw_undo
+                .iter()
+                .any(|&DrawUndo {image_id, x, y, color}| {
+                    x == target_x && y == target_y
+                });
+            if !has_previous_undo {
+                undo.draw_undo.push(DrawUndo::new(
+                    self.image_id,
+                    target_x,
+                    target_y,
+                    state.images[self.image_id].get_point(target_x, target_y)));
+            }
+        }
     }
 }
 
 impl Window for DrawingWindow {
     fn handle_mouse_down(&self, state: &mut State,
                              mouse_x: i32, mouse_y: i32) {
-        let image = &mut state.images[self.image_id];
-        let coordinates = self.get_index(&image, mouse_x, mouse_y);
-        if let Some((xx,yy)) = coordinates {
-            if let Some(undo) = state.undo_stack.last_mut() {
-                let has_undo = 
-                    undo.draw_undo
-                    .iter()
-                    .any(|&DrawUndo {image_id, x, y, color}| {
-                        x as i32 == xx && y as i32 == yy
-                    });
-                if !has_undo {
-                    undo.draw_undo
-                        .push(DrawUndo::new(self.image_id,
-                                            xx as usize,
-                                            yy as usize,
-                                            image.get_point(xx as usize, yy as usize)));
-                }
-            }
-            *image.get_mut_ref(xx as usize, yy as usize) = state.current_color; 
+        let coordinates = self.get_index(&state.images[self.image_id], mouse_x, mouse_y);
+        if let Some((x,y)) = coordinates {
+            let color = state.images[self.image_id].get_point(x,y);
+            self.save_undo(state, x, y, color);
+            *state.images[self.image_id].get_mut_ref(x, y) = state.current_color; 
         }
     }
 

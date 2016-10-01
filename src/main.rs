@@ -59,8 +59,8 @@ pub fn main() {
                 Event::MouseMotion { x, y, .. } => {
                     handle_mouse_motion(&mut state, &windows, x, y);
                 },
-                Event::MouseButtonUp { mouse_btn: Mouse::Left, .. } => {
-                    state.left_mouse_down = false;
+                Event::MouseButtonUp { mouse_btn: Mouse::Left, x, y, .. } => {
+                    handle_mouse_release(&mut state, x, y);
                 },
                 Event::KeyDown { keycode: Some(keycode), keymod, .. } => {
                     if handle_key_down(&mut state, windows.as_mut() , &commands,
@@ -91,6 +91,16 @@ fn handle_mouse_left_down(state: &mut State, windows: &[Box<Window>],
     for window in windows {
         window.handle_mouse_down(state, x, y);
     }
+}
+
+fn handle_mouse_release(state: &mut State, x: i32, y: i32) {
+    state.left_mouse_down = false;
+    if let Some(ref undo) = state.undo_stack.last() {
+        if !undo.is_empty() {
+            return;
+        }
+    }
+    state.undo_stack.pop();
 }
 
 fn handle_mouse_motion(state: &mut State, windows: &[Box<Window>],

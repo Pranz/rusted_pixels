@@ -36,6 +36,10 @@ impl Undo {
             draw_undo: vec![],
         }
     }
+
+    pub fn is_empty(&self) -> bool {
+        self.draw_undo.is_empty()
+    }
 }
 
 pub struct DrawUndo {
